@@ -1,13 +1,16 @@
 from ..db import db
-from .step import Step
-from .calorie import Calorie
-from .meter import Meter
-from .heart_rate import HeartRate
 
 
-class User(db.Document):
-    username = db.StringField(required=True, unique=True)
-    steps = db.ListField(db.EmbeddedDocumentField(Step)) # db.EmbeddedDocumentListField(Step)
-    meters = db.EmbeddedDocumentListField(Meter)
-    calories = db.EmbeddedDocumentListField(Calorie)
-    heart_rates = db.EmbeddedDocumentListField(HeartRate)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+    def to_dict(self):
+        dict = {
+            "id": self.id,
+            "username": self.username
+        }
+        return dict

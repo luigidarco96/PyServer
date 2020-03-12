@@ -1,5 +1,7 @@
 flask
-flask-mongoengine
+flask-sqlalchemy
+mysql-connector-python
+jsonpickle
 flask-restful
 opencv-python
 keras

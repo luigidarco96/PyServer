@@ -1,8 +1,12 @@
-from flask_mongoengine import MongoEngine
+from flask_sqlalchemy import SQLAlchemy
 
-db = MongoEngine()
+db = SQLAlchemy()
 
 
-def initialize_db(app):
+def initialise_db(app, initialise):
     db.init_app(app)
+    if initialise:
+        with app.app_context():
+            db.create_all()
+            print("DB tables created")
 
