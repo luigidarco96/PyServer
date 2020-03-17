@@ -3,6 +3,8 @@ flask-sqlalchemy
 mysql-connector-python
 jsonpickle
 flask-restful
+passlib
+flask-jwt-extended
 opencv-python
 keras
 tensorflow

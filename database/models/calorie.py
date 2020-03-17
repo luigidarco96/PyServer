@@ -9,8 +9,9 @@ class Calorie(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('calories', lazy=True))
 
-    def __repr__(self):
-        return '<Calorie %r>' % self.id
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
     def to_dict(self):
         dict = {
@@ -21,3 +22,5 @@ class Calorie(db.Model):
         }
         return dict
 
+    def __repr__(self):
+        return '<Calorie %r>' % self.id
