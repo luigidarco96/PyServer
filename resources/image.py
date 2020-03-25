@@ -8,6 +8,7 @@ import time
 import os
 import sys
 from .utility import custom_response
+import base64
 
 dir_name = os.path.dirname(sys.modules['__main__'].__file__)
 image_save_path = dir_name + "/food_images/"
@@ -25,11 +26,16 @@ class ImagesApi(Resource):
         if not os.path.exists(current_dir):
             os.makedirs(current_dir, exist_ok=True)
 
-        image = request.files.get("image", "")
+        data = request.get_json()
+        image = base64.b64decode(data['image'])
 
         timestamp = calendar.timegm(time.gmtime())
         image_name = str(timestamp) + ".jpg"
-        image.save(os.path.join(current_dir, image_name))
+
+        current_path = "{}/{}".format(current_dir, image_name)
+
+        with open(current_path, 'wb') as f:
+            f.write(image)
 
         custom_link = "http://localhost/images/{}/{}".format(current_user.id, image_name)
         return custom_response(
