@@ -13,6 +13,8 @@ import base64
 dir_name = os.path.dirname(sys.modules['__main__'].__file__)
 image_save_path = dir_name + "/food_images/"
 
+server_url = "http://192.168.43.115"
+
 
 class ImagesApi(Resource):
 
@@ -37,7 +39,7 @@ class ImagesApi(Resource):
         with open(current_path, 'wb') as f:
             f.write(image)
 
-        custom_link = "http://localhost/images/{}/{}".format(current_user.id, image_name)
+        custom_link = "{}/images/{}/{}".format(server_url, current_user.id, image_name)
         return custom_response(
             200,
             "Image saved",
@@ -47,16 +49,18 @@ class ImagesApi(Resource):
 
 class ImageApi(Resource):
 
-    @jwt_required
-    @requires_access_level(2)
+    # @jwt_required
+    # @requires_access_level(2)
     def get(self, user, id):
-        current_user = User.find_by_username(get_jwt_identity()['username'])
+        # current_user = User.find_by_username(get_jwt_identity()['username'])
 
+        '''
         if not str(current_user.id) == user:
             return custom_response(
                 401,
                 "Permission denied"
             )
+        '''
 
         current_dir = "{}{}".format(image_save_path, user)
         print(current_dir)

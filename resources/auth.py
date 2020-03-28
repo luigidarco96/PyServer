@@ -16,7 +16,7 @@ class LoginApi(Resource):
             return custom_response(401, 'User {} doesn\'t exist'.format(body['username']))
 
         if User.verify_hash(body['password'], user.password):
-            access_token = create_access_token(create_identity(user))
+            access_token = create_access_token(create_identity(user), expires_delta=False)
             refresh_token = create_refresh_token(create_identity(user))
             return custom_response(
                 200,

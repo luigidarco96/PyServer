@@ -51,7 +51,7 @@ class MetersApi(Resource):
         return custom_response(
             200,
             "Mater added",
-            meter.id
+            new_meter.id
         )
 
 

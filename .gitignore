@@ -134,5 +134,8 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# idea folde
+# idea folder
 .idea
+
+# food images
+.food_images/
