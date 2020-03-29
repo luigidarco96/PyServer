@@ -1,8 +1,9 @@
 flask
 flask-sqlalchemy
+flask-restplus
+Werkzeug==0.16.1
 mysql-connector-python
 jsonpickle
-flask-restful
 passlib
 flask-jwt-extended
 opencv-python

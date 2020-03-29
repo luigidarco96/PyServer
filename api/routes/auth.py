@@ -1,15 +1,24 @@
 from flask import request
-from flask_restful import Resource
+from flask_restplus import Resource
 from database.models.user import User
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required,
                                 get_jwt_identity, get_raw_jwt)
 from database.models.revoked_token import RevokedToken
-from .utility import custom_response
+from api.utility import custom_response
+from api import api
+from api.custom_request import login_data
+
+ns = api.namespace('', description='Operations related to authentication')
 
 
+@ns.route('/sign-in')
+@api.expect(login_data)
 class LoginApi(Resource):
 
     def post(self):
+        """
+        Create new user session
+        """
         body = request.get_json()
         user = User.find_by_username(body['username'])
         if not user:
@@ -33,10 +42,15 @@ class LoginApi(Resource):
             )
 
 
+@ns.route('/sign-out/access')
+@api.doc(security='apiKey')
 class LogoutAccess(Resource):
 
     @jwt_required
     def post(self):
+        """
+        Revoke user access token
+        """
         jti = get_raw_jwt()['jti']
         try:
             revoked_token = RevokedToken(jti=jti)
@@ -52,10 +66,15 @@ class LogoutAccess(Resource):
             )
 
 
+@ns.route('/sign-out/refresh')
+@api.doc(security='apiKey')
 class LogoutRefresh(Resource):
 
     @jwt_refresh_token_required
     def post(self):
+        """
+        Revoke user refresh token
+        """
         jti = get_raw_jwt()['jti']
         try:
             revoked_token = RevokedToken(jti=jti)
@@ -71,10 +90,14 @@ class LogoutRefresh(Resource):
             )
 
 
+@ns.route('/refresh-token')
 class RefreshToken(Resource):
 
     @jwt_refresh_token_required
     def post(self):
+        """
+        Refresh token
+        """
         current_user = get_jwt_identity()
         access_token = create_access_token(identity=current_user)
         return custom_response(

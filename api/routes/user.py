@@ -1,18 +1,27 @@
 from flask import request
 from database.models.user import User
 from database.models.user import USER_ROLE
-from flask_restful import Resource
-from .utility import list_to_array
+from flask_restplus import Resource
+from api.utility import list_to_array
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, get_jwt_identity)
-from .access_restrictions import requires_access_level
-from .utility import custom_response
+from api.routes.access_restrictions import requires_access_level
+from api.utility import custom_response
+from api import api
+from api.custom_request import login_data
+
+ns = api.namespace('users', description='Operations related to users')
 
 
+@ns.route('/all')
+@api.doc(security='apiKey')
 class UsersAllApi(Resource):
 
     @jwt_required
     @requires_access_level(0)
     def get(self):
+        """
+        Return all the users
+        """
         users = User.query.all()
         users = list_to_array(users)
         return custom_response(
@@ -22,11 +31,16 @@ class UsersAllApi(Resource):
         )
 
 
+@ns.route('')
 class UsersApi(Resource):
 
     @jwt_required
     @requires_access_level(2)
+    @api.doc(security='apiKey')
     def get(self):
+        """
+        Return the information for the caller user
+        """
         current_user = get_jwt_identity()
         user = User.find_by_username(current_user['username'])
         return custom_response(
@@ -35,7 +49,11 @@ class UsersApi(Resource):
             user.to_dict()
         )
 
+    @api.expect(login_data)
     def post(self):
+        """
+        Add a new user
+        """
         body = request.get_json()
 
         if User.find_by_username(body['username']):
@@ -68,11 +86,17 @@ class UsersApi(Resource):
             )
 
 
+@ns.route('/<int:id>')
+@api.doc(security='apiKey')
 class UserApi(Resource):
 
     @jwt_required
     @requires_access_level(0)
+    @api.doc(params={'id': 'id of user'})
     def get(self, id):
+        """
+        Return the information of the specified user
+        """
         user = User.query.filter_by(id=id).first()
         if user is None:
             return custom_response(

@@ -1,20 +1,27 @@
 from flask import Response, request, abort
-from flask_restful import Resource
+from flask_restplus import Resource
 import time
 import calendar
 import os
 import sys
 import ml_resources.face_scrapper as fs
 from deepface import DeepFace
+from api import api
 
 dir_name = os.path.dirname(sys.modules['__main__'].__file__)
 image_save_path = dir_name + "/ml_resources/images/"
 SAVE_IMAGES = True
 
+ns = api.namespace('prediction', description='Operations related to image prediction')
 
+
+@ns.route('')
 class PredictionApi(Resource):
 
     def post(self):
+        """
+        Return the emotion prediction for the specified image
+        """
         if not request.files:
             abort(400)
 

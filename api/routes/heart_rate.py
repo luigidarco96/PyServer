@@ -1,19 +1,28 @@
 from flask import request
 from database.models.user import User
 from database.models.heart_rate import HeartRate
-from flask_restful import Resource
+from flask_restplus import Resource
 from datetime import datetime
-from .utility import list_to_array
-from .access_restrictions import requires_access_level
+from api.utility import list_to_array
+from api.routes.access_restrictions import requires_access_level
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from .utility import custom_response
+from api.utility import custom_response
+from api import api
+from api.custom_request import fitness_data
+
+ns = api.namespace('heart-rates', description='Operations related to heart rates')
 
 
+@ns.route('/all')
+@api.doc(security='apiKey')
 class HeartRatesAllApi(Resource):
 
     @jwt_required
     @requires_access_level(0)
     def get(self):
+        """
+        Return all the heart rates
+        """
         heart_rates = HeartRate.query.all()
         heart_rates = list_to_array(heart_rates)
         return custom_response(
@@ -23,11 +32,16 @@ class HeartRatesAllApi(Resource):
         )
 
 
+@ns.route('')
+@api.doc(security='apiKey')
 class HeartRatesApi(Resource):
 
     @jwt_required
     @requires_access_level(2)
     def get(self):
+        """
+        Return all the heart rates for the caller user
+        """
         current_user = User.find_by_username(get_jwt_identity()['username'])
         heart_rates = HeartRate.query.with_parent(current_user).all()
         heart_rates = list_to_array(heart_rates)
@@ -39,7 +53,11 @@ class HeartRatesApi(Resource):
 
     @jwt_required
     @requires_access_level(2)
+    @api.expect(fitness_data)
     def post(self):
+        """
+        Add a new heart rate for the caller user
+        """
         current_user = User.find_by_username(get_jwt_identity()['username'])
         heart_rate = request.get_json()
         new_heart_rate = HeartRate(
@@ -55,11 +73,17 @@ class HeartRatesApi(Resource):
         )
 
 
+@ns.route('/<int:id>')
+@api.doc(security='apiKey')
 class HeartRateApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
+    @api.doc(params={'id': 'id of user'})
     def get(self, id):
+        """
+        Return all the heart rates for the specified user
+        """
         user = User.query.filter_by(id=id).first()
         heart_rates = HeartRate.query.with_parent(user).all()
         heart_rates = list_to_array(heart_rates)

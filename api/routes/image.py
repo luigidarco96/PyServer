@@ -1,26 +1,36 @@
 from flask import request, send_from_directory
-from flask_restful import Resource
+from flask_restplus import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from .access_restrictions import requires_access_level
+from api.routes.access_restrictions import requires_access_level
 from database.models.user import User
 import calendar
 import time
 import os
 import sys
-from .utility import custom_response
+from api.utility import custom_response
 import base64
+from api import api
+from settings import FLASK_SERVER_NAME
 
 dir_name = os.path.dirname(sys.modules['__main__'].__file__)
 image_save_path = dir_name + "/food_images/"
 
-server_url = "http://192.168.43.115"
+server_url = FLASK_SERVER_NAME
+
+ns = api.namespace('images', description='Operations related to images')
 
 
+@ns.route('')
+@api.doc(security='apiKey')
 class ImagesApi(Resource):
 
     @jwt_required
     @requires_access_level(2)
     def post(self):
+        """
+        Add a new image for the caller user
+        """
+
         current_user = User.find_by_username(get_jwt_identity()['username'])
 
         current_dir = "{}{}/".format(image_save_path, current_user.id)
@@ -47,11 +57,19 @@ class ImagesApi(Resource):
         )
 
 
+@ns.route('/<int:user>/<int:image>')
 class ImageApi(Resource):
 
     # @jwt_required
     # @requires_access_level(2)
-    def get(self, user, id):
+    @api.doc(params={
+        'user': 'id of the user',
+        'image': 'name of the image'
+    })
+    def get(self, user, image):
+        """
+        Return the image requested
+        """
         # current_user = User.find_by_username(get_jwt_identity()['username'])
 
         '''
@@ -64,9 +82,9 @@ class ImageApi(Resource):
 
         current_dir = "{}{}".format(image_save_path, user)
         print(current_dir)
-        print(id)
+        print(image)
 
         return send_from_directory(
             current_dir,
-            id
+            image
         )
