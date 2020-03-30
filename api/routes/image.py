@@ -57,7 +57,7 @@ class ImagesApi(Resource):
         )
 
 
-@ns.route('/<int:user>/<int:image>')
+@ns.route('/<int:user>/<string:image>')
 class ImageApi(Resource):
 
     # @jwt_required
