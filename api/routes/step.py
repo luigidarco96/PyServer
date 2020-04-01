@@ -1,6 +1,7 @@
 from flask import request
 from database.models.user import User
 from database.models.step import Step
+from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -59,18 +60,45 @@ class StepsApi(Resource):
         Add new step for the caller user
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
+
         step = request.get_json()
-        new_step = Step(
-            timestamp=datetime.now(),
-            value=step['value'],
-            user=current_user
-        )
-        new_step.save()
-        return custom_response(
-            200,
-            "Step added",
-            new_step.id
-        )
+
+        current_date = datetime.now()
+        day_stat = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = current_date.replace(hour=23, minute=59, second=59, microsecond=59)
+
+        old_step = Step.query.filter(User.id == current_user.id,
+                                     Step.timestamp >= day_stat,
+                                     Step.timestamp <= day_end).first()
+
+        if old_step is None:
+            new_step = Step(
+                timestamp=current_date,
+                value=step['value'],
+                user=current_user
+            )
+            new_step.save()
+            return custom_response(
+                200,
+                "Step added",
+                new_step.id
+            )
+
+        else:
+            if old_step.value <= step['value']:
+                old_step.value = step['value']
+                db.session.commit()
+                return custom_response(
+                    200,
+                    "Step updated",
+                    old_step.id
+                )
+            else:
+                return custom_response(
+                    200,
+                    "Step already updated",
+                    old_step.id
+                )
 
 
 @ns.route('/<int:id>')
