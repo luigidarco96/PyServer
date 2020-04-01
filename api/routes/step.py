@@ -123,6 +123,7 @@ class StepApi(Resource):
 
 
 @ns.route('/last/<int:limit>')
+@api.doc(security='apiKey')
 class LastStepsApi(Resource):
 
     @jwt_required

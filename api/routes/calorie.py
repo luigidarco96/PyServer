@@ -1,6 +1,7 @@
 from flask import request
 from database.models.user import User
 from database.models.calorie import Calorie
+from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -59,18 +60,45 @@ class CaloriesApi(Resource):
         Add a new calorie for the caller user
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
+
         calorie = request.get_json()
-        new_calories = Calorie(
-            timestamp=datetime.now(),
-            value=calorie['value'],
-            user=current_user
-        )
-        new_calories.save()
-        return custom_response(
-            200,
-            "Calorie added",
-            new_calories.id
-        )
+
+        current_date = datetime.now()
+        day_stat = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = current_date.replace(hour=23, minute=59, second=59, microsecond=59)
+
+        old_calorie = Calorie.query.filter(User.id == current_user.id,
+                                           Calorie.timestamp >= day_stat,
+                                           Calorie.timestamp <= day_end).first()
+
+        if old_calorie is None:
+            new_calorie = Calorie(
+                timestamp=current_date,
+                value=calorie['value'],
+                user=current_user
+            )
+            new_calorie.save()
+            return custom_response(
+                200,
+                "Calorie added",
+                new_calorie.id
+            )
+
+        else:
+            if old_calorie.value <= calorie['value']:
+                old_calorie.value = calorie['value']
+                db.session.commit()
+                return custom_response(
+                    200,
+                    "Calorie updated",
+                    old_calorie.id
+                )
+            else:
+                return custom_response(
+                    200,
+                    "Calorie already updated",
+                    old_calorie.id
+                )
 
 
 @ns.route('/<int:id>')
@@ -93,3 +121,23 @@ class CalorieApi(Resource):
             calories
         )
 
+
+@ns.route('/last/<int:limit>')
+@api.doc(security='apiKey')
+class LastCaloriesApi(Resource):
+
+    @jwt_required
+    @requires_access_level(2)
+    @api.doc(params={'limit': 'number of element to keep'})
+    def get(self, limit):
+        """
+        Return the last n calories
+        """
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        calories = Calorie.query.with_parent(current_user).limit(limit).all()
+        calories = list_to_array(calories)
+        return custom_response(
+            200,
+            "Last {} calories".format(limit),
+            calories
+        )

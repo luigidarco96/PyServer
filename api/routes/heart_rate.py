@@ -1,6 +1,7 @@
 from flask import request
 from database.models.user import User
 from database.models.heart_rate import HeartRate
+from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -59,18 +60,45 @@ class HeartRatesApi(Resource):
         Add a new heart rate for the caller user
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
+
         heart_rate = request.get_json()
-        new_heart_rate = HeartRate(
-            timestamp=datetime.now(),
-            value=heart_rate['value'],
-            user=current_user
-        )
-        new_heart_rate.save()
-        return custom_response(
-            200,
-            "Heart rate added",
-            new_heart_rate.id
-        )
+
+        current_date = datetime.now()
+        day_stat = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = current_date.replace(hour=23, minute=59, second=59, microsecond=59)
+
+        old_hr = HeartRate.query.filter(User.id == current_user.id,
+                                        HeartRate.timestamp >= day_stat,
+                                        HeartRate.timestamp <= day_end).first()
+
+        if old_hr is None:
+            new_hr = HeartRate(
+                timestamp=current_date,
+                value=heart_rate['value'],
+                user=current_user
+            )
+            new_hr.save()
+            return custom_response(
+                200,
+                "Heart rate added",
+                new_hr.id
+            )
+
+        else:
+            if old_hr.value <= heart_rate['value']:
+                old_hr.value = old_hr['value']
+                db.session.commit()
+                return custom_response(
+                    200,
+                    "Heart rate updated",
+                    old_hr.id
+                )
+            else:
+                return custom_response(
+                    200,
+                    "Heart rate already updated",
+                    old_hr.id
+                )
 
 
 @ns.route('/<int:id>')
@@ -93,3 +121,23 @@ class HeartRateApi(Resource):
             heart_rates
         )
 
+
+@ns.route('/last/<int:limit>')
+@api.doc(security='apiKey')
+class LastHeartRatesApi(Resource):
+
+    @jwt_required
+    @requires_access_level(2)
+    @api.doc(params={'limit': 'number of element to keep'})
+    def get(self, limit):
+        """
+        Return the last n heart rates
+        """
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        heart_rates = HeartRate.query.with_parent(current_user).limit(limit).all()
+        heart_rates = list_to_array(heart_rates)
+        return custom_response(
+            200,
+            "Last {} heart rates".format(limit),
+            heart_rates
+        )
