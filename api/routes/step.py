@@ -93,3 +93,22 @@ class StepApi(Resource):
             steps
         )
 
+
+@ns.route('/last/<int:limit>')
+class LastStepsApi(Resource):
+
+    @jwt_required
+    @requires_access_level(2)
+    @api.doc(params={'limit': 'number of element to keep'})
+    def get(self, limit):
+        """
+        Return the last n steps
+        """
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        steps = Step.query.with_parent(current_user).limit(limit).all()
+        steps = list_to_array(steps)
+        return custom_response(
+            200,
+            "Last {} steps".format(limit),
+            steps
+        )
