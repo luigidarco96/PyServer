@@ -133,10 +133,18 @@ class LastMetersApi(Resource):
         Return the last n meters
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
-        meters = Meter.query.with_parent(current_user).limit(limit).all()
-        meters = list_to_array(meters)
-        return custom_response(
-            200,
-            "Last {} meters".format(limit),
-            meters
-        )
+
+        if current_user.is_admin() or current_user.has_child(id):
+            current_user = User.find_by_username(get_jwt_identity()['username'])
+            meters = Meter.query.with_parent(current_user).limit(limit).all()
+            meters = list_to_array(meters)
+            return custom_response(
+                200,
+                "Last {} meters".format(limit),
+                meters
+            )
+        else:
+            return custom_response(
+                401,
+                "Permission denied. User {} not a child".format(id)
+            )

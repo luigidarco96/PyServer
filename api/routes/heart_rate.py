@@ -134,10 +134,18 @@ class LastHeartRatesApi(Resource):
         Return the last n heart rates
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
-        heart_rates = HeartRate.query.with_parent(current_user).limit(limit).all()
-        heart_rates = list_to_array(heart_rates)
-        return custom_response(
-            200,
-            "Last {} heart rates".format(limit),
-            heart_rates
-        )
+
+        if current_user.is_admin() or current_user.has_child(id):
+            current_user = User.find_by_username(get_jwt_identity()['username'])
+            heart_rates = HeartRate.query.with_parent(current_user).limit(limit).all()
+            heart_rates = list_to_array(heart_rates)
+            return custom_response(
+                200,
+                "Last {} heart rates".format(limit),
+                heart_rates
+            )
+        else:
+            return custom_response(
+                401,
+                "Permission denied. User {} not a child".format(id)
+            )

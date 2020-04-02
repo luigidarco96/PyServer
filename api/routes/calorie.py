@@ -112,14 +112,22 @@ class CalorieApi(Resource):
         """
         Return all the calories for the specified user
         """
-        user = User.query.filter_by(id=id).first()
-        calories = Calorie.query.with_parent(user).all()
-        calories = list_to_array(calories)
-        return custom_response(
-            200,
-            "{} calories".format(user.username),
-            calories
-        )
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+
+        if current_user.is_admin() or current_user.has_child(id):
+            user = User.query.filter_by(id=id).first()
+            calories = Calorie.query.with_parent(user).all()
+            calories = list_to_array(calories)
+            return custom_response(
+                200,
+                "{} calories".format(user.username),
+                calories
+            )
+        else:
+            return custom_response(
+                401,
+                "Permission denied. User {} not a child".format(id)
+            )
 
 
 @ns.route('/last/<int:limit>')

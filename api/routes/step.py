@@ -112,14 +112,22 @@ class StepApi(Resource):
         """
         Return all the steps for the specified user
         """
-        user = User.query.filter_by(id=id).first()
-        steps = Step.query.with_parent(user).all()
-        steps = list_to_array(steps)
-        return custom_response(
-            200,
-            "{} steps".format(user.username),
-            steps
-        )
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+
+        if current_user.is_admin() or current_user.has_child(id):
+            user = User.query.filter_by(id=id).first()
+            steps = Step.query.with_parent(user).all()
+            steps = list_to_array(steps)
+            return custom_response(
+                200,
+                "{} steps".format(user.username),
+                steps
+            )
+        else:
+            return custom_response(
+                401,
+                "Permission denied. User {} not a child".format(id)
+            )
 
 
 @ns.route('/last/<int:limit>')

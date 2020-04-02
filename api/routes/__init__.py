@@ -8,6 +8,7 @@ from .meter import ns as meter_namespace
 from .prediction import ns as prediction_namespace
 from .step import ns as step_namespace
 from .user import ns as user_namespace
+from .qr_code import ns as qrcode_namespace
 
 
 def initialise_routes(api):
@@ -21,3 +22,4 @@ def initialise_routes(api):
     api.add_namespace(prediction_namespace)
     api.add_namespace(step_namespace)
     api.add_namespace(user_namespace)
+    api.add_namespace(qrcode_namespace)

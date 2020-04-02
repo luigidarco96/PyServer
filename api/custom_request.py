@@ -23,4 +23,8 @@ login_data = api.model('Login Data', {
     'password': fields.String(readOnly=True, required=True, description="Password"),
 })
 
+qr_data = api.model('QR Data', {
+    'code': fields.String(readOnly=True, required=True, description="QR code")
+})
+
 

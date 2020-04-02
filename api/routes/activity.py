@@ -85,11 +85,20 @@ class ActivityApi(Resource):
         """
         Return all the activities for the specified user
         """
-        user = User.query.filter_by(id=id).first()
-        activities = Activity.query.with_parent(user).all()
-        activities = list_to_array(activities)
-        return custom_response(
-            200,
-            "{} activities".format(user.username),
-            activities
-        )
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+
+        if current_user.is_admin() or current_user.has_child(id):
+            user = User.query.filter_by(id=id).first()
+            activities = Activity.query.with_parent(user).all()
+            activities = list_to_array(activities)
+            return custom_response(
+                200,
+                "{} activities".format(user.username),
+                activities
+            )
+        else:
+            return custom_response(
+                401,
+                "Permission denied. User {} not a child".format(id)
+            )
+

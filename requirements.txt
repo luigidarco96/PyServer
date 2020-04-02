@@ -10,3 +10,5 @@ opencv-python
 keras
 tensorflow
 deepface
+qrcode
+cryptography

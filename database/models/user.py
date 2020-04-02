@@ -7,16 +7,50 @@ USER_ROLE = {
     'user': 2
 }
 
+groups = db.Table(
+    'groups',
+    db.Column('parent_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('children_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.Integer, nullable=False)
+    family_members = db.relationship(
+        'User',
+        secondary=groups,
+        primaryjoin=(groups.c.parent_id == id),
+        secondaryjoin=(groups.c.children_id == id),
+        backref=db.backref('parents', lazy='dynamic'),
+        lazy='dynamic'
+    )
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def is_admin(self):
+        return self.role == USER_ROLE['admin']
+
+    def add_child(self, child):
+        if child not in self.family_members:
+            self.convert_to_family()
+            self.family_members.append(child)
+            db.session.commit()
+
+    def has_child(self, child_id):
+        child = self.family_members.filter_by(id=child_id).first()
+        if child is None:
+            return False
+        else:
+            return True
+
+    def convert_to_family(self):
+        if self.role == USER_ROLE['user']:
+            self.role = USER_ROLE['family']
 
     def to_dict(self):
         dict = {
@@ -25,14 +59,6 @@ class User(db.Model):
             "role": self.role
         }
         return dict
-
-    @classmethod
-    def is_admin(cls, user):
-        return user['role'] == USER_ROLE['admin']
-
-    @classmethod
-    def is_user(cls, user):
-        return user['role'] == USER_ROLE['user']
 
     @classmethod
     def find_by_username(cls, username):
