@@ -1,7 +1,6 @@
 from flask import request
 from database.models.user import User
 from database.models.calorie import Calorie
-from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -87,7 +86,7 @@ class CaloriesApi(Resource):
         else:
             if old_calorie.value <= calorie['value']:
                 old_calorie.value = calorie['value']
-                db.session.commit()
+                old_calorie.update()
                 return custom_response(
                     200,
                     "Calorie updated",

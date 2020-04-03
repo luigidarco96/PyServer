@@ -1,7 +1,6 @@
 from flask import request
 from database.models.user import User
 from database.models.step import Step
-from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -87,7 +86,7 @@ class StepsApi(Resource):
         else:
             if old_step.value <= step['value']:
                 old_step.value = step['value']
-                db.session.commit()
+                old_step.update()
                 return custom_response(
                     200,
                     "Step updated",

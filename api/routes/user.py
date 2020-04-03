@@ -104,19 +104,6 @@ class UsersApi(Resource):
                 'Something went wrong'
             )
 
-    @jwt_required
-    @requires_access_level(2)
-    @api.doc(security='apiKey')
-    @api.expect(login_data)
-    def put(self):
-        """
-        Update information for the caller user
-        """
-        user = User.find_by_username(get_jwt_identity()['username'])
-        new_user = request.get_json()
-        user.username = new_user['username']
-        user.password = new_user['password']
-
 
 @ns.route('/<int:id>')
 @api.doc(security='apiKey')
@@ -143,12 +130,40 @@ class UserApi(Resource):
 
     @jwt_required
     @requires_access_level(0)
+    @api.doc(security='apiKey')
+    @api.expect(login_data)
+    def put(self):
+        """
+        Update information for the specified user
+        """
+        user = User.find_by_username(get_jwt_identity()['username'])
+        new_user = request.get_json()
+        user.username = new_user['username']
+        user.password = User.generate_hash(new_user['password'])
+        user.update()
+        return custom_response(
+            200,
+            "Your information was updated",
+            user.to_dict()
+        )
+
+    @jwt_required
+    @requires_access_level(0)
     def delete(self, id):
         """
         Delete the specified user
         """
         user = User.query.filter_by(id=id).first()
+        if user is None:
+            return custom_response(
+                404,
+                "User {} not found".format(id)
+            )
         user.delete()
+        return custom_response(
+            200,
+            "User {} deleted".format(id)
+        )
 
 
 def create_identity(user):

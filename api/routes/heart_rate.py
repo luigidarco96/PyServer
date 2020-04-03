@@ -1,7 +1,6 @@
 from flask import request
 from database.models.user import User
 from database.models.heart_rate import HeartRate
-from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -87,7 +86,7 @@ class HeartRatesApi(Resource):
         else:
             if old_hr.value <= heart_rate['value']:
                 old_hr.value = old_hr['value']
-                db.session.commit()
+                old_hr.update()
                 return custom_response(
                     200,
                     "Heart rate updated",

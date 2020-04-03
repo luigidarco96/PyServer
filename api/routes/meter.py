@@ -1,7 +1,6 @@
 from flask import request
 from database.models.user import User
 from database.models.meter import Meter
-from database.db import db
 from flask_restplus import Resource
 from datetime import datetime
 from api.utility import list_to_array
@@ -86,7 +85,7 @@ class MetersApi(Resource):
         else:
             if old_meter.value <= meter['value']:
                 old_meter.value = meter['value']
-                db.session.commit()
+                old_meter.update()
                 return custom_response(
                     200,
                     "Meter updated",
