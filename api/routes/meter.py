@@ -100,47 +100,25 @@ class MetersApi(Resource):
                 )
 
 
-@ns.route('/<int:id>')
-@api.doc(security='apiKey')
-class MeterApi(Resource):
+@ns.route('/user/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the user'})
+class MetersByUserApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
-    @api.doc(params={'id': 'id of user'})
     def get(self, id):
         """
         Return all the meters for the specified user
         """
-        user = User.query.filter_by(id=id).first()
-        meters = Meter.query.with_parent(user).all()
-        meters = list_to_array(meters)
-        return custom_response(
-            200,
-            "{} meters".format(user.username),
-            meters
-        )
-
-
-@ns.route('/last/<int:limit>')
-@api.doc(security='apiKey')
-class LastMetersApi(Resource):
-
-    @jwt_required
-    @requires_access_level(2)
-    @api.doc(params={'limit': 'number of element to keep'})
-    def get(self, limit):
-        """
-        Return the last n meters
-        """
         current_user = User.find_by_username(get_jwt_identity()['username'])
 
         if current_user.is_admin() or current_user.has_child(id):
-            current_user = User.find_by_username(get_jwt_identity()['username'])
-            meters = Meter.query.with_parent(current_user).limit(limit).all()
+            user = User.query.filter_by(id=id).first()
+            meters = Meter.query.with_parent(user).all()
             meters = list_to_array(meters)
             return custom_response(
                 200,
-                "Last {} meters".format(limit),
+                "{} meters".format(user.username),
                 meters
             )
         else:
@@ -148,3 +126,4 @@ class LastMetersApi(Resource):
                 401,
                 "Permission denied. User {} not a child".format(id)
             )
+

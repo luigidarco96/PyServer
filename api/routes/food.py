@@ -75,13 +75,12 @@ class FoodsApi(Resource):
         )
 
 
-@ns.route('/<int:id>')
-@api.doc(security='apiKey')
+@ns.route('/user/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the user'})
 class FoodApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
-    @api.doc(params={'id': 'id of the user'})
     def get(self, id):
         """
         Return all the foods for the specified user

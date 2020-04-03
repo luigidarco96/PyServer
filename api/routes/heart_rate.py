@@ -101,47 +101,25 @@ class HeartRatesApi(Resource):
                 )
 
 
-@ns.route('/<int:id>')
-@api.doc(security='apiKey')
+@ns.route('/user/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the user'})
 class HeartRateApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
-    @api.doc(params={'id': 'id of user'})
     def get(self, id):
         """
         Return all the heart rates for the specified user
         """
-        user = User.query.filter_by(id=id).first()
-        heart_rates = HeartRate.query.with_parent(user).all()
-        heart_rates = list_to_array(heart_rates)
-        return custom_response(
-            200,
-            "{} heart rates".format(user.username),
-            heart_rates
-        )
-
-
-@ns.route('/last/<int:limit>')
-@api.doc(security='apiKey')
-class LastHeartRatesApi(Resource):
-
-    @jwt_required
-    @requires_access_level(2)
-    @api.doc(params={'limit': 'number of element to keep'})
-    def get(self, limit):
-        """
-        Return the last n heart rates
-        """
         current_user = User.find_by_username(get_jwt_identity()['username'])
 
         if current_user.is_admin() or current_user.has_child(id):
-            current_user = User.find_by_username(get_jwt_identity()['username'])
-            heart_rates = HeartRate.query.with_parent(current_user).limit(limit).all()
+            user = User.query.filter_by(id=id).first()
+            heart_rates = HeartRate.query.with_parent(user).all()
             heart_rates = list_to_array(heart_rates)
             return custom_response(
                 200,
-                "Last {} heart rates".format(limit),
+                "{} heart rates".format(user.username),
                 heart_rates
             )
         else:

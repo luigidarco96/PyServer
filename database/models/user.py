@@ -32,6 +32,10 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def is_admin(self):
         return self.role == USER_ROLE['admin']
 

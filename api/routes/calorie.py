@@ -101,13 +101,12 @@ class CaloriesApi(Resource):
                 )
 
 
-@ns.route('/<int:id>')
-@api.doc(security='apiKey')
+@ns.route('/user/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the user'})
 class CalorieApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
-    @api.doc(params={'id': 'id of the user'})
     def get(self, id):
         """
         Return all the calories for the specified user
@@ -128,24 +127,3 @@ class CalorieApi(Resource):
                 401,
                 "Permission denied. User {} not a child".format(id)
             )
-
-
-@ns.route('/last/<int:limit>')
-@api.doc(security='apiKey')
-class LastCaloriesApi(Resource):
-
-    @jwt_required
-    @requires_access_level(2)
-    @api.doc(params={'limit': 'number of element to keep'})
-    def get(self, limit):
-        """
-        Return the last n calories
-        """
-        current_user = User.find_by_username(get_jwt_identity()['username'])
-        calories = Calorie.query.with_parent(current_user).limit(limit).all()
-        calories = list_to_array(calories)
-        return custom_response(
-            200,
-            "Last {} calories".format(limit),
-            calories
-        )

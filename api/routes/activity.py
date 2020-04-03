@@ -74,13 +74,12 @@ class ActivitiesApi(Resource):
         )
 
 
-@ns.route('/<int:id>')
-@api.doc(security='apiKey')
+@ns.route('/user/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the user'})
 class ActivityApi(Resource):
 
     @jwt_required
     @requires_access_level(1)
-    @api.doc(params={'id': 'id of user'})
     def get(self, id):
         """
         Return all the activities for the specified user
