@@ -89,6 +89,11 @@ class FoodApi(Resource):
 
         if current_user.is_admin() or current_user.has_child(id):
             user = User.query.filter_by(id=id).first()
+            if user is None:
+                return custom_response(
+                    404,
+                    "User {} not found".format(id)
+                )
             foods = Food.query.with_parent(user).all()
             foods = list_to_array(foods)
             return custom_response(

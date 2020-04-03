@@ -114,6 +114,11 @@ class StepsByUserApi(Resource):
 
         if current_user.is_admin() or current_user.has_child(id):
             user = User.query.filter_by(id=id).first()
+            if user is None:
+                return custom_response(
+                    404,
+                    "User {} not found".format(id)
+                )
             steps = Step.query.with_parent(user).all()
             steps = list_to_array(steps)
             return custom_response(

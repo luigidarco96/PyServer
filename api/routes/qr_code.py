@@ -12,6 +12,7 @@ import os
 import sys
 import json
 from cryptography.fernet import Fernet
+from api.utility import custom_response
 
 key = Fernet.generate_key()
 
@@ -73,9 +74,19 @@ class QrCodeVerify(Resource):
         code_user = decode_content_qr_code(code)
         child_user = User.query.filter_by(id=code_user['id']).first()
 
+        if child_user is None:
+            return custom_response(
+                404,
+                "User {} not found".format(id)
+            )
+
         current_user.add_child(child_user)
 
-        return child_user.id
+        return custom_response(
+            200,
+            "User {} added to your family".format(child_user.username),
+            child_user.id
+        )
 
 
 def generate_content_qr_code(current_user):

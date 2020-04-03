@@ -114,6 +114,11 @@ class CalorieApi(Resource):
 
         if current_user.is_admin() or current_user.has_child(id):
             user = User.query.filter_by(id=id).first()
+            if user is None:
+                return custom_response(
+                    404,
+                    "User {} not found".format(id)
+                )
             calories = Calorie.query.with_parent(user).all()
             calories = list_to_array(calories)
             return custom_response(

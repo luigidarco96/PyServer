@@ -88,6 +88,11 @@ class ActivityApi(Resource):
 
         if current_user.is_admin() or current_user.has_child(id):
             user = User.query.filter_by(id=id).first()
+            if user is None:
+                return custom_response(
+                    404,
+                    "User {} not found".format(id)
+                )
             activities = Activity.query.with_parent(user).all()
             activities = list_to_array(activities)
             return custom_response(
