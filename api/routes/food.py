@@ -62,7 +62,7 @@ class FoodsApi(Resource):
         food = request.get_json()
         new_food = Food(
             name=food['name'],
-            datetime=datetime.now(),
+            datetime=food['datetime'],
             calorie=food['calorie'],
             image_path="",
             user=current_user
@@ -72,6 +72,32 @@ class FoodsApi(Resource):
             200,
             "Food saved",
             new_food.id
+        )
+
+
+@ns.route('/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the food'})
+class FoodApi(Resource):
+
+    @jwt_required
+    @requires_access_level(1)
+    def delete(self, id):
+        """
+        Delete a food by its id
+        """
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        food = Food.query.with_parent(current_user).filter_by(id=id).first()
+
+        if food is None:
+            return custom_response(
+                404,
+                "Food with id {} not found".format(id)
+            )
+
+        food.delete()
+        return custom_response(
+            200,
+            "Food {} deleted".format(id)
         )
 
 

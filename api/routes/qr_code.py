@@ -62,7 +62,7 @@ class QrCodeVerify(Resource):
 
     @jwt_required
     @requires_access_level(2)
-    def post(self):
+    def get(self):
         """
         Make the caller account a family member for code user
         """

@@ -60,8 +60,8 @@ class ImagesApi(Resource):
 @ns.route('/<int:user>/<string:image>')
 class ImageApi(Resource):
 
-    # @jwt_required
-    # @requires_access_level(2)
+    @jwt_required
+    @requires_access_level(2)
     @api.doc(params={
         'user': 'id of the user',
         'image': 'name of the image'
@@ -70,15 +70,13 @@ class ImageApi(Resource):
         """
         Return the image requested
         """
-        # current_user = User.find_by_username(get_jwt_identity()['username'])
+        current_user = User.find_by_username(get_jwt_identity()['username'])
 
-        '''
         if not str(current_user.id) == user:
             return custom_response(
                 401,
                 "Permission denied"
             )
-        '''
 
         current_dir = "{}{}".format(image_save_path, user)
         print(current_dir)

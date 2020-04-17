@@ -81,6 +81,12 @@ class UsersApi(Resource):
                 'User {} already exists'.format(body['username'])
             )
 
+        if body['username'] == '' or body['password'] == '':
+            return custom_response(
+                400,
+                "Invalid parameters"
+            )
+
         user = User(
             username=body['username'],
             password=User.generate_hash(body['password']),

@@ -62,7 +62,7 @@ class ActivitiesApi(Resource):
         activity = request.get_json()
         new_activity = Activity (
             name=activity['name'],
-            datetime=datetime.now(),
+            datetime=activity['datetime'],
             duration=activity['duration'],
             user=current_user
         )
@@ -71,6 +71,32 @@ class ActivitiesApi(Resource):
             200,
             "Activity added",
             new_activity.id
+        )
+
+
+@ns.route('/<int:id>')
+@api.doc(security='apiKey', params={'id': 'id of the food'})
+class ActivityApi(Resource):
+
+    @jwt_required
+    @requires_access_level(1)
+    def delete(self, id):
+        """
+        Delete an activity by its id
+        """
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        activity = Activity.query.with_parent(current_user).filter_by(id=id).first()
+
+        if activity is None:
+            return custom_response(
+                404,
+                "Activity with id {} not found".format(id)
+            )
+
+        activity.delete()
+        return custom_response(
+            200,
+            "Activity {} deleted".format(id)
         )
 
 
