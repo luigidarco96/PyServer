@@ -9,6 +9,5 @@ flask-jwt-extended
 opencv-python
 keras
 tensorflow
-deepface
 qrcode
 cryptography
