@@ -16,3 +16,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 JWT_SECRET_KEY = 'luigiluigi123'
 JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
+
+# Emotion Prediction
+SAVE_IMG = False
