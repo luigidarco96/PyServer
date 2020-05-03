@@ -28,7 +28,7 @@ class QrCode(Resource):
 
     @jwt_required
     @requires_access_level(2)
-    def post(self):
+    def get(self):
         """
         Return a new QRCode
         """
@@ -62,7 +62,7 @@ class QrCodeVerify(Resource):
 
     @jwt_required
     @requires_access_level(2)
-    def get(self):
+    def post(self):
         """
         Make the caller account a family member for code user
         """

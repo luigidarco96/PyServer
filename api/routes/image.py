@@ -72,7 +72,7 @@ class ImageApi(Resource):
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
 
-        if not str(current_user.id) == user:
+        if current_user.id != user:
             return custom_response(
                 401,
                 "Permission denied"
