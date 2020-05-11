@@ -3,6 +3,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.backend import set_session
 from tensorflow.python.keras.models import model_from_json
+from csv import writer
+
+num_img = 0
 
 sess = tf.Session()
 graph = tf.get_default_graph()
@@ -16,6 +19,9 @@ emotions = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
 
 
 def make_scraper(image_path):
+    global num_img
+    num_img += 1
+
     image = cv2.imread(image_path)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -29,9 +35,8 @@ def make_scraper(image_path):
             minSize=(30, 30)
     )
 
-    print("Found {0} Faces!".format(len(faces)))
-
     if len(faces) <= 0:
+        save_result(False, image_path)
         return None
 
     # Save only first face
@@ -47,7 +52,6 @@ def make_scraper(image_path):
 
 
 def predict_emotion(image_path):
-    print("Image path: {}" .format(image_path))
     image = cv2.imread(image_path)
 
     detected_face = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # transform to gray scale
@@ -69,6 +73,21 @@ def predict_emotion(image_path):
         max_index = np.argmax(predictions[0])
 
         if predictions[0][max_index] < 0.5:
+            save_result(False, image_path)
             return None
 
+    save_result(True, image_path)
     return emotions[max_index]
+
+
+def save_result(status, image_path):
+
+    row = [1, image_path] if status else [0, image_path]
+
+    file_name = "log.csv"
+    with open(file_name, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+        csv_writer = writer(write_obj)
+        # Add contents of list as last row in the csv file
+        csv_writer.writerow(row)
+

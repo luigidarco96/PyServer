@@ -18,4 +18,4 @@ JWT_BLACKLIST_ENABLED = True
 JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 
 # Emotion Prediction
-SAVE_IMG = False
+SAVE_IMG = True
