@@ -8,6 +8,6 @@ passlib
 flask-jwt-extended
 opencv-python
 keras
-tensorflow
+tensorflow==1.14.0
 qrcode
 cryptography
