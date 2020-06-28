@@ -7,7 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_r
 from api.routes.access_restrictions import requires_access_level
 from api.utility import custom_response
 from api import api
-from api.custom_request import login_data
+from api.custom_request import login_data, user_data
 
 ns = api.namespace('users', description='Operations related to users')
 
@@ -68,6 +68,28 @@ class UsersApi(Resource):
             user.to_dict()
         )
 
+    @jwt_required
+    @requires_access_level(2)
+    @api.doc(security='apiKey')
+    @api.expect(user_data)
+    def put(self):
+        """
+        Update the information of the caller user
+        """
+        user = User.find_by_username(get_jwt_identity()['username'])
+        new_user = request.get_json()
+        user.full_name = new_user['full_name']
+        user.date_of_birth = new_user['date_of_birth']
+        user.gender = new_user['gender']
+        user.weight = new_user['weight']
+        user.height = new_user['height']
+        user.update()
+        return custom_response(
+            200,
+            "Your information was updated",
+            user.to_dict()
+        )
+
     @api.expect(login_data)
     def post(self):
         """
@@ -90,7 +112,12 @@ class UsersApi(Resource):
         user = User(
             username=body['username'],
             password=User.generate_hash(body['password']),
-            role=USER_ROLE['user']
+            role=USER_ROLE['user'],
+            full_name='',
+            gender=0,
+            date_of_birth='1800-01-01',
+            weight=0,
+            height=0,
         )
         try:
             user.save()

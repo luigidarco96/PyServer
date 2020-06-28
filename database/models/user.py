@@ -19,6 +19,11 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.Integer, nullable=False)
+    full_name = db.Column(db.String(120), nullable=False)
+    gender = db.Column(db.Integer, nullable=True)
+    date_of_birth = db.Column(db.Date, nullable=True)
+    weight = db.Column(db.Integer, nullable=True)
+    height = db.Column(db.Integer, nullable=True)
     family_members = db.relationship(
         'User',
         secondary=groups,
@@ -63,7 +68,12 @@ class User(db.Model):
         dict = {
             "id": self.id,
             "username": self.username,
-            "role": self.role
+            "role": self.role,
+            "full_name": self.full_name,
+            "gender": self.gender,
+            "date_of_birth": self.date_of_birth.strftime("%d/%m/%Y"),
+            "weight": self.weight,
+            "height": self.height
         }
         return dict
 

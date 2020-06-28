@@ -27,4 +27,12 @@ qr_data = api.model('QR Data', {
     'code': fields.String(readOnly=True, required=True, description="QR code")
 })
 
+user_data = api.model('User Data', {
+    'full_name': fields.String(readOnly=True, required=True, description="Full Name"),
+    'date_of_birth': fields.String(readOnly=True, required=True, description="Date of Birth"),
+    'gender': fields.Integer(readOnly=True, required=True, description="Gender"),
+    'weight': fields.Integer(readOnly=True, required=True, description="Weight"),
+    'height': fields.Integer(readOnly=True, required=True, description="Activity date time")
+})
+
 
