@@ -7,7 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_r
 from api.routes.access_restrictions import requires_access_level
 from api.utility import custom_response
 from api import api
-from api.custom_request import login_data, user_data
+from api.custom_request import user_data, registration_data
 
 ns = api.namespace('users', description='Operations related to users')
 
@@ -81,8 +81,6 @@ class UsersApi(Resource):
         user.full_name = new_user['full_name']
         user.date_of_birth = new_user['date_of_birth']
         user.gender = new_user['gender']
-        user.weight = new_user['weight']
-        user.height = new_user['height']
         user.update()
         return custom_response(
             200,
@@ -90,7 +88,7 @@ class UsersApi(Resource):
             user.to_dict()
         )
 
-    @api.expect(login_data)
+    @api.expect(registration_data)
     def post(self):
         """
         Add a new user
@@ -103,7 +101,14 @@ class UsersApi(Resource):
                 'User {} already exists'.format(body['username'])
             )
 
-        if body['username'] == '' or body['password'] == '':
+        if (
+                body['username'] == '' or
+                body['password'] == '' or
+                body['password'] != body['confirm_password'] or
+                body['fullname'] == '' or
+                body['gender'] > 1 or
+                body['date_of_birth'] == ''
+        ):
             return custom_response(
                 400,
                 "Invalid parameters"
@@ -113,11 +118,9 @@ class UsersApi(Resource):
             username=body['username'],
             password=User.generate_hash(body['password']),
             role=USER_ROLE['user'],
-            full_name='',
-            gender=0,
-            date_of_birth='1800-01-01',
-            weight=0,
-            height=0,
+            full_name=body['full_name'],
+            gender=body['gender'],
+            date_of_birth=body['date_of_birth'],
         )
         try:
             user.save()
@@ -164,15 +167,16 @@ class UserApi(Resource):
     @jwt_required
     @requires_access_level(0)
     @api.doc(security='apiKey')
-    @api.expect(login_data)
-    def put(self):
+    @api.expect(user_data)
+    def put(self, id):
         """
         Update information for the specified user
         """
-        user = User.find_by_username(get_jwt_identity()['username'])
+        user = User.query.filter_by(id=id).first()
         new_user = request.get_json()
-        user.username = new_user['username']
-        user.password = User.generate_hash(new_user['password'])
+        user.full_name = new_user['full_name']
+        user.date_of_birth = new_user['date_of_birth']
+        user.gender = new_user['gender']
         user.update()
         return custom_response(
             200,
