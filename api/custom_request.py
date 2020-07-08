@@ -26,7 +26,7 @@ login_data = api.model('Login Data', {
 registration_data = api.model('Registration Data', {
     'username': fields.String(readOnly=True, required=True, description="Username"),
     'password': fields.String(readOnly=True, required=True, description="Password"),
-    'confirm_ password': fields.String(readOnly=True, required=True, description="Confirm Password"),
+    'confirm_password': fields.String(readOnly=True, required=True, description="Confirm Password"),
     'full_name': fields.String(readOnly=True, required=True, description="Full Name"),
     'gender': fields.Integer(readOnly=True, required=True, description="Gender"),
     'date_of_birth': fields.Date(readOnly=True, required=True, description="Date of Birth"),
