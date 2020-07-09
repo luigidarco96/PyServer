@@ -105,7 +105,7 @@ class UsersApi(Resource):
                 body['username'] == '' or
                 body['password'] == '' or
                 body['password'] != body['confirm_password'] or
-                body['fullname'] == '' or
+                body['full_name'] == '' or
                 body['gender'] > 1 or
                 body['date_of_birth'] == ''
         ):
