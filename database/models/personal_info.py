@@ -51,7 +51,7 @@ class PersonalInfo(db.Model):
             "height": self.height,
             "bmi": self.bmi,
             "bmi_class": self.bmi_class,
-            "timestamp": self.timestamp,
+            "timestamp": self.timestamp.strftime("%m/%d/%Y, %H:%M:%S"),
             "user_id": self.user_id
         }
 
