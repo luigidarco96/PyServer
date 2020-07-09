@@ -25,15 +25,15 @@ class LoginApi(Resource):
             return custom_response(401, 'User {} doesn\'t exist'.format(body['username']))
 
         if User.verify_hash(body['password'], user.password):
-            access_token = create_access_token(create_identity(user), expires_delta=False)
-            refresh_token = create_refresh_token(create_identity(user))
+            tmp_user = user.to_dict()
+            tmp_user.update({
+                'access_token': create_access_token(create_identity(user), expires_delta=False),
+                'refresh_token': create_refresh_token(create_identity(user))
+            })
             return custom_response(
                 200,
                 'Logged in as {}'.format(user.username),
-                {
-                    'access_token': access_token,
-                    'refresh_token': refresh_token
-                }
+                tmp_user
             )
         else:
             return custom_response(
