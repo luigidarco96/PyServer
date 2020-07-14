@@ -42,7 +42,7 @@ class PersonalInfoApi(Resource):
         Return all the personal info for the caller user
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
-        personal_info = PersonalInfo.query.with_parent(current_user).all()
+        personal_info = PersonalInfo.query.with_parent(current_user).order_by(PersonalInfo.timestamp.desc()).all()
         personal_info = list_to_array(personal_info)
         return custom_response(
             200,
@@ -55,7 +55,7 @@ class PersonalInfoApi(Resource):
     @api.expect(personal_info_data)
     def post(self):
         """
-        Add a new calorie for the caller user
+        Add a new personal info for the caller user
         """
         current_user = User.find_by_username(get_jwt_identity()['username'])
 
