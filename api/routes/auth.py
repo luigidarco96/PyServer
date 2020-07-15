@@ -91,6 +91,7 @@ class LogoutRefresh(Resource):
 
 
 @ns.route('/refresh-token')
+@api.doc(security='apiKey')
 class RefreshToken(Resource):
 
     @jwt_refresh_token_required
@@ -98,12 +99,16 @@ class RefreshToken(Resource):
         """
         Refresh token
         """
-        current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
+        current_user = User.find_by_username(get_jwt_identity()['username'])
+        tmp_user = current_user.to_dict()
+        tmp_user.update({
+            'access_token': create_access_token(create_identity(current_user), expires_delta=False),
+            'refresh_token': create_refresh_token(create_identity(current_user))
+        })
         return custom_response(
             200,
             'Access token refreshed',
-            access_token
+            tmp_user
         )
 
 
