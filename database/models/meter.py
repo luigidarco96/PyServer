@@ -23,7 +23,7 @@ class Meter(db.Model):
     def to_dict(self):
         dict = {
             "id": self.id,
-            "timestamp": self.timestamp.strftime("%m/%d/%Y, %H:%M:%S"),
+            "timestamp": self.timestamp.strftime("%d/%m/%Y, %H:%M:%S"),
             "value": self.value,
             "user_id": self.user_id
         }

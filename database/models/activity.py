@@ -25,7 +25,7 @@ class Activity(db.Model):
         dict = {
             "id": self.id,
             "name": self.name,
-            "datetime": self.datetime.strftime("%m/%d/%Y, %H:%M:%S"),
+            "datetime": self.datetime.strftime("%d/%m/%Y, %H:%M:%S"),
             "duration": self.duration,
             "user_id": self.user_id
         }

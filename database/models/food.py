@@ -26,7 +26,7 @@ class Food(db.Model):
         dict = {
             "id": self.id,
             "name": self.name,
-            "datetime": self.datetime.strftime("%m/%d/%Y, %H:%M:%S"),
+            "datetime": self.datetime.strftime("%d/%m/%Y, %H:%M:%S"),
             "calorie": self.calorie,
             "image_path": self.image_path,
             "user_id": self.user_id
