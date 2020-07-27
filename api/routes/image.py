@@ -58,6 +58,7 @@ class ImagesApi(Resource):
 
 
 @ns.route('/<int:user>/<string:image>')
+@api.doc(security='apiKey')
 class ImageApi(Resource):
 
     @jwt_required
@@ -79,8 +80,6 @@ class ImageApi(Resource):
             )
 
         current_dir = "{}{}".format(image_save_path, user)
-        print(current_dir)
-        print(image)
 
         return send_from_directory(
             current_dir,

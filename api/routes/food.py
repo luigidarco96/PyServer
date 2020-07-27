@@ -64,7 +64,7 @@ class FoodsApi(Resource):
             name=food['name'],
             datetime=food['datetime'],
             calorie=food['calorie'],
-            image_path="",
+            image_path=food['image_path'],
             user=current_user
         )
         new_food.save()
@@ -80,7 +80,7 @@ class FoodsApi(Resource):
 class FoodApi(Resource):
 
     @jwt_required
-    @requires_access_level(1)
+    @requires_access_level(2)
     def delete(self, id):
         """
         Delete a food by its id
